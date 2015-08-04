@@ -2,8 +2,11 @@
 
 var chokidar = require('chokidar');
 var path = require('path');
+var events = require('events');
 
 var common = require('./common');
+
+var EventEmitter = events.EventEmitter;
 
 /**
  * Constants
@@ -49,13 +52,72 @@ ChokidarWatcher.prototype.init = function () {
   }
 
   var self = this;
-  this.watcher = chokidar.watch('
+  var opts = {
+    // persistent: true, // ?
+  };
 
-  if (this.client) {
-    this.client.removeAllListeners();
+  // Ignore dot directories
+  // TODO; Make this ignore dot directories
+  // but not dot files?
+  if (!this.dot) {
+    opts.ignored = /[\/\\]\./;
   }
 
-  var self = this;
-  var
+  // TODO: Handle multiple globs
+  var toWatch = path.join(this.root, this.globs[0] || '');
 
+  this.watcher = chokidar.watch(toWatch, opts);
+
+  var log = console.log;
+
+  this.watcher
+    .on('add', this.emitEvent.bind(this, ADD_EVENT))
+    .on('change', this.emitEvent.bind(this, CHANGE_EVENT))
+    .on('unlink', this.emitEvent.bind(this, DELETE_EVENT))
+    .on('addDir', this.emitEvent.bind(this, ADD_EVENT))
+    .on('unlinkDir', this.emitEvent.bind(this, DELETE_EVENT))
+    .on('error', function (err) {
+      console.error("Error while watching with chokidar:", err, "\nRestarting watch...");
+      self.init();
+    })
+    .on('ready', function () {
+      // console.log("Initial chokidar scan complete; ready to report changes.");
+      self.emit('ready');
+    })
+    ;
+
+}
+
+/**
+ * Transform and emit an event comming from the poller.
+ *
+ * @param {EventEmitter} monitor
+ * @public
+ */
+
+ChokidarWatcher.prototype.emitEvent = function(type, file, stat) {
+  file = path.relative(this.root, file);
+
+  if (type === DELETE_EVENT) {
+    // Matching the non-polling API
+    stat = null;
+  }
+
+  this.emit(type, file, this.root, stat);
+  this.emit(ALL_EVENT, type, file, this.root, stat);
+};
+
+/**
+ * End watching.
+ *
+ * @public
+ */
+
+ChokidarWatcher.prototype.close = function(callback) {
+  this.watcher.close();
+  delete this.watcher;
+  this.removeAllListeners();
+  if (typeof callback === 'function') {
+    setImmediate(callback.bind(null, null, true));
+  }
 }
