@@ -10,6 +10,7 @@ Sane aims to be fast, small, and reliable file system watcher. It does that by:
 * Where `fs.watch` is not reliable you have the choice of using the following alternatives:
   * [the facebook watchman library](https://facebook.github.io/watchman/)
   * polling
+  * [chokidar](https://github.com/paulmillr/chokidar)
 
 ## Install
 
@@ -49,6 +50,7 @@ options:
 * `glob`: a single string glob pattern or an array of them.
 * `poll`: puts the watcher in polling mode. Under the hood that means `fs.watchFile`.
 * `watchman`: makes the watcher use [watchman](https://facebook.github.io/watchman/).
+* `chokidar`: makes the watcher use [chokidar](https://github.com/paulmillr/chokidar),
 * `dot`: enables watching files/directories that start with a dot.
 
 For the glob pattern documentation, see [minimatch](https://github.com/isaacs/minimatch).
@@ -68,11 +70,15 @@ The polling watcher class. Takes the same options as `sane(options, dir)` with t
 
 * interval: indicates how often the files should be polled. (passed to fs.watchFile)
 
-### sane.{Node|Watchman|Poll}Watcher#close
+### sane.ChokidarWatcher(dir, options)
+
+The chokidar watcher class. Takes the same options as `sane(options, dir)`.
+
+### sane.{Node|Watchman|Poll|Chokidar}Watcher#close
 
 Stops watching.
 
-### sane.{Node|Watchman|Poll}Watcher events
+### sane.{Node|Watchman|Poll|Chokidar}Watcher events
 
 Emits the following events:
 

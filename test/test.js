@@ -17,7 +17,10 @@ describe('sane in normal mode', function() {
   harness.call(this, {});
 });
 describe('sane in watchman mode', function() {
-  harness.call(this, {watchman: true})
+  harness.call(this, {watchman: true});
+});
+describe('sane in chokidar mode', function () {
+  harness.call(this, {chokidar: true});
 });
 
 function getWatcherClass(mode) {

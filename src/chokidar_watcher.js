@@ -15,7 +15,6 @@ var CHANGE_EVENT = common.CHANGE_EVENT;
 var DELETE_EVENT = common.DELETE_EVENT;
 var ADD_EVENT = common.ADD_EVENT;
 var ALL_EVENT = common.ALL_EVENT;
-var SUB_NAME = 'sane-sub';
 
 /**
  * Export `ChokidarWatcher` class.
@@ -68,8 +67,6 @@ ChokidarWatcher.prototype.init = function () {
 
   this.watcher = chokidar.watch(toWatch, opts);
 
-  var log = console.log;
-
   this.watcher
     .on('add', this.emitEvent.bind(this, ADD_EVENT))
     .on('change', this.emitEvent.bind(this, CHANGE_EVENT))
@@ -77,16 +74,16 @@ ChokidarWatcher.prototype.init = function () {
     .on('addDir', this.emitEvent.bind(this, ADD_EVENT))
     .on('unlinkDir', this.emitEvent.bind(this, DELETE_EVENT))
     .on('error', function (err) {
-      console.error("Error while watching with chokidar:", err, "\nRestarting watch...");
+      console.error('Error while watching with chokidar:',
+        err, '\nRestarting watch...');
       self.init();
     })
     .on('ready', function () {
-      // console.log("Initial chokidar scan complete; ready to report changes.");
+      // Initial scan complete; ready to report changes
       self.emit('ready');
-    })
-    ;
+    });
 
-}
+};
 
 /**
  * Transform and emit an event comming from the poller.
@@ -120,4 +117,4 @@ ChokidarWatcher.prototype.close = function(callback) {
   if (typeof callback === 'function') {
     setImmediate(callback.bind(null, null, true));
   }
-}
+};
