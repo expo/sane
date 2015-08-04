@@ -23,6 +23,7 @@
   "author": "amasad",
   "license": "MIT",
   "dependencies": {
+    "chokidar": "^1.0.5",
     "exec-sh": "^0.2.0",
     "fb-watchman": "^1.1.0",
     "minimatch": "~0.2.14",
