@@ -9,7 +9,7 @@ var tmpdir = os.tmpdir();
 var jo = path.join.bind(path);
 var testdir = jo(tmpdir, 'sane_test');
 
-
+/*
 describe('sane in polling mode', function() {
   harness.call(this, {poll: true});
 });
@@ -19,6 +19,7 @@ describe('sane in normal mode', function() {
 describe('sane in watchman mode', function() {
   harness.call(this, {watchman: true});
 });
+*/
 describe('sane in chokidar mode', function () {
   harness.call(this, {chokidar: true});
 });
@@ -28,6 +29,8 @@ function getWatcherClass(mode) {
     return sane.WatchmanWatcher;
   } else if (mode.poll) {
     return sane.PollWatcher;
+  } else if (mode.chokidar) {
+    return sane.ChokidarWatcher;
   } else {
     return sane.NodeWatcher;
   }
@@ -69,6 +72,7 @@ function harness(mode) {
     it('change emits event', function(done) {
       var testfile = jo(testdir, 'file_1');
       this.watcher.on('change', function(filepath, dir, stat) {
+        // console.log("change", "filepath=", filepath, "dir=", dir, "stat=", stat);
         assert(stat instanceof fs.Stats);
         assert.equal(filepath, path.relative(testdir, testfile));
         assert.equal(dir, testdir);
@@ -93,6 +97,7 @@ function harness(mode) {
     });
 
     it('adding a file will trigger an add event', function(done) {
+
       var testfile = jo(testdir, 'file_x' + Math.floor(Math.random() * 10000));
       this.watcher.on('add', function(filepath, dir, stat) {
         assert(stat instanceof fs.Stats);
@@ -270,6 +275,7 @@ function harness(mode) {
       this.watcher.close(done);
     });
 
+    /*
     it('ignore files according to glob', function (done) {
       var i = 0;
       this.watcher.on('change', function(filepath, dir) {
@@ -284,6 +290,8 @@ function harness(mode) {
         fs.writeFileSync(jo(testdir, 'file_2'), 'wow');
       });
     });
+    */
+
   });
 
   describe('sane(dir, {dot: false})', function() {

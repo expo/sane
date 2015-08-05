@@ -53,17 +53,21 @@ ChokidarWatcher.prototype.init = function () {
   var self = this;
   var opts = {
     // persistent: true, // ?
+    alwaysStat: true,
+    atomic: true,
+    ignorePermissionsErrors: false,
   };
 
   // Ignore dot directories
-  // TODO; Make this ignore dot directories
-  // but not dot files?
+  // TODO: Make this ignore dot directories but not dot files?
   if (!this.dot) {
     opts.ignored = /[\/\\]\./;
   }
 
   // TODO: Handle multiple globs
   var toWatch = path.join(this.root, this.globs[0] || '');
+
+  this.isReady = false;
 
   this.watcher = chokidar.watch(toWatch, opts);
 
@@ -80,6 +84,7 @@ ChokidarWatcher.prototype.init = function () {
     })
     .on('ready', function () {
       // Initial scan complete; ready to report changes
+      self.isReady = true;
       self.emit('ready');
     });
 
@@ -93,11 +98,22 @@ ChokidarWatcher.prototype.init = function () {
  */
 
 ChokidarWatcher.prototype.emitEvent = function(type, file, stat) {
+  if (!this.isReady) {
+    return;
+  }
+
+  // console.log('*emitEvent*', type, file, '' + stat);
+
   file = path.relative(this.root, file);
 
   if (type === DELETE_EVENT) {
     // Matching the non-polling API
     stat = null;
+  }
+
+  // Filter out these mysterious ADD_EVENT s
+  if ((type === ADD_EVENT) && (!file)) {
+    return;
   }
 
   this.emit(type, file, this.root, stat);
